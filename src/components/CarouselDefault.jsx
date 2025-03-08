@@ -1,57 +1,72 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   BsFillArrowRightCircleFill,
   BsFillArrowLeftCircleFill,
-} from "react-icons/bs"
+} from "react-icons/bs";
 
-export default function CarouselDefault({slides}) {
-    let [current, setCurrent] = useState(0);
+export default function CarouselDefault({ slides, interval = 3000 }) {
+  const [current, setCurrent] = useState(0);
 
-  let previousSlide = () => {
-    if (current === 0) setCurrent(slides.length - 1);
-    else setCurrent(current - 1);
+  // Function to go to the previous slide
+  const previousSlide = () => {
+    setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
   };
 
-  let nextSlide = () => {
-    if (current === slides.length - 1) setCurrent(0);
-    else setCurrent(current + 1);
+  // Function to go to the next slide
+  const nextSlide = () => {
+    setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
   };
-    return <div className="overflow-hidden relative h-[40vh]">
-    <div
-      className={`flex transition ease-out duration-40`}
-      style={{
-        transform: `translateX(-${current * 100}%)`,
-      }}
-    >
-      {slides.map((s) => {
-        return <img src={s} />;
-      })}
-    </div>
 
-    <div className="absolute top-0 h-full w-full justify-between items-center flex text-white px-10 text-3xl">
-      <button onClick={previousSlide}>
-        <BsFillArrowLeftCircleFill />
-      </button>
-      <button onClick={nextSlide}>
-        <BsFillArrowRightCircleFill />
-      </button>
-    </div>
+  // Auto-play effect
+  useEffect(() => {
+    const slideInterval = setInterval(nextSlide, interval); // Change slide every `interval` ms
 
-    <div className="absolute bottom-0 py-4 flex justify-center gap-3 w-full">
-      {slides.map((s, i) => {
-        return (
+    return () => clearInterval(slideInterval); // Cleanup on unmount
+  }, [current]); // Re-run when `current` changes
+
+  return (
+    <div className="overflow-hidden relative h-[40vh] w-full flex items-center justify-center rounded-2xl border-4 border-red-500  ">
+      {/* Slides Wrapper */}
+      <div
+        className="flex transition-transform ease-out duration-500"
+        style={{
+          transform: `translateX(-${current * 100}%)`,
+          width: `${slides.length * 100}%`,
+        }}
+      >
+        {slides.map((s, index) => (
+          <img
+            key={index}
+            className="w-full h-full object-cover"
+            src={s}
+            alt={`Slide ${index}`}
+          />
+        ))}
+      </div>
+
+      {/* Navigation Arrows */}
+      <div className="absolute top-0 h-full w-full flex justify-between items-center px-5 text-transparent text-3xl">
+        <button onClick={previousSlide}>
+          <BsFillArrowLeftCircleFill />
+        </button>
+        <button onClick={nextSlide}>
+          <BsFillArrowRightCircleFill />
+        </button>
+      </div>
+
+      {/* Dots Navigation */}
+      <div className="absolute bottom-4 flex justify-center gap-3 w-full">
+        {slides.map((_, i) => (
           <div
-            onClick={() => {
-              setCurrent(i);
-            }}
-            key={"circle" + i}
-            className={`rounded-full w-3 h-3 cursor-pointer  ${
-              i == current ? "bg-white" : "bg-gray-500"
+            key={i}
+            onClick={() => setCurrent(i)}
+            className={`rounded-full w-3 h-3 cursor-pointer ${
+              i === current ? "bg-white" : "bg-gray-500"
             }`}
           ></div>
-        );
-      })}
+        ))}
+      </div>
     </div>
-  </div>
-;
+  );
 }
+

@@ -1,6 +1,7 @@
 import React from 'react'
 import Sidebar from './components/Sidebar'
 import Display from './components/Display'
+import Player from './components/Player'
 const App = () => {
   return (
     <div className="h-screen bg-black">
@@ -8,6 +9,7 @@ const App = () => {
       <Sidebar />
       <Display />
      </div>
+     <Player />
     </div>
   )
 }
