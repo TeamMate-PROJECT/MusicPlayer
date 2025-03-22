@@ -2,6 +2,7 @@ import React from 'react'
 import Sidebar from './components/Sidebar'
 import Display from './components/Display'
 import Player from './components/Player'
+import { AudioPlayerProvider } from "./context/AudioPlayerContext";
 const App = () => {
   return (
     <div className="h-screen bg-black">
@@ -9,7 +10,9 @@ const App = () => {
       <Sidebar />
       <Display />
      </div>
+     <AudioPlayerProvider>
      <Player />
+     </AudioPlayerProvider>
     </div>
   )
 }
