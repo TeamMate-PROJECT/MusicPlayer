@@ -6,24 +6,38 @@ const router = express.Router();
 // 🎵 **Add a Song**
 router.post("/add", async (req, res) => {
   try {
-    const { title, artist, album, genre, emotion, description, songUrl, imageUrl, duration, uploadedBy, isFeatured, releaseDate } = req.body;
+    const { title, artist, album, genre, emotion, description, songUrl, imageUrl, duration, isFeatured, releaseDate } = req.body;
 
-    if (!title || !artist || !album || !genre || !emotion || !songUrl || !imageUrl || !duration || !uploadedBy) {
-      return res.status(400).json({ error: "All required fields must be filled" });
+    // ✅ Validate required fields
+    if (!title || !artist || !genre || !emotion || !songUrl || !imageUrl || !duration) {
+      return res.status(400).json({ error: "⚠️ Missing required fields. Please provide all necessary details." });
     }
 
+    // ✅ Create new song object
     const newSong = new Song({
-      title, artist, album, genre, emotion, description, songUrl, imageUrl, duration,
-      uploadedBy, isFeatured, releaseDate, likes: 0, createdAt: new Date()
+      title,
+      artist,
+      album,
+      genre,
+      emotion,
+      description,
+      songUrl,
+      imageUrl,
+      duration,
+      isFeatured,
+      releaseDate
     });
 
+    // ✅ Save song to MongoDB
     await newSong.save();
     res.status(201).json({ message: "✅ Song added successfully!", song: newSong });
+
   } catch (error) {
     console.error("❌ Error adding song:", error);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "🚨 Internal Server Error" });
   }
 });
+
 
 // 🎵 **Get All Songs**
 router.get("/all", async (req, res) => {

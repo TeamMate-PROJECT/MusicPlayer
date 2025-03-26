@@ -5,26 +5,19 @@ const songSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     artist: { type: String, required: true, trim: true },
     album: { type: String, trim: true },
-    genre: { type: String, trim: true }, // Example: "Melody", "Pop", "Rock"
+    genre: { type: String, trim: true }, 
     emotion: { 
       type: String, 
       required: true, 
       enum: ["Happy", "Sad", "Relaxed", "Energetic", "Romantic", "Angry", "Chill"] 
-    }, // Categorized by emotion
-
-    description: { type: String, required: true, trim: true }, // Short song description
-
-    songUrl: { type: String, required: true }, // Cloudinary song URL
-    imageUrl: { type: String, required: true }, // Cloudinary cover image URL
-
-    duration: { type: Number, required: true }, // Duration in seconds
-
-    uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Reference to user who uploaded
-
-    isFeatured: { type: Boolean, default: false }, // Featured song flag
-    releaseDate: { type: Date }, // Release date
-
-    createdAt: { type: Date, default: Date.now } // Timestamp
+    },
+    description: { type: String, required: true, trim: true }, 
+    songUrl: { type: String, required: true }, 
+    imageUrl: { type: String, required: true }, 
+    duration: { type: Number, required: true }, 
+    isFeatured: { type: Boolean, default: false }, 
+    releaseDate: { type: Date }, 
+    createdAt: { type: Date, default: Date.now } 
   },
   { timestamps: true }
 );
