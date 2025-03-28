@@ -9,7 +9,7 @@ const songSchema = new mongoose.Schema(
     emotion: { 
       type: String, 
       required: true, 
-      enum: ["Happy", "Sad", "Relaxed", "Energetic", "Romantic", "Angry", "Chill"] 
+      enum: ["Happy", "Sad", "Relaxed", "Energetic", "Romantic", "Angry", "Chill","Party","Emotional"] 
     },
     description: { type: String, required: true, trim: true }, 
     songUrl: { type: String, required: true }, 
