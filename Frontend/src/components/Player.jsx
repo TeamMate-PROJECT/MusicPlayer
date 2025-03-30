@@ -3,17 +3,7 @@ import { AudioPlayerContext } from "../context/AudioPlayerContext";
 import { assets } from "../assets/assets";
 
 const Player = () => {
-  const {
-    currentSong,
-    isPlaying,
-    playSong, // ✅ Use this to toggle play/pause
-    progress,
-    duration,
-    seekTo,
-    volume,
-    changeVolume,
-  } = useContext(AudioPlayerContext);
-
+  const { currentSong, isPlaying, playSong, progress, duration, seekTo, volume, changeVolume } = useContext(AudioPlayerContext);
   const progressRef = useRef(null);
 
   useEffect(() => {
@@ -46,7 +36,7 @@ const Player = () => {
             className="w-4 cursor-pointer"
             src={isPlaying ? assets.pause_icon : assets.play_icon}
             alt="Play/Pause"
-            onClick={() => playSong(currentSong)} // ✅ Toggle play/pause
+            onClick={() => playSong(currentSong)} // ✅ Play or pause song
           />
           <img className="w-4 cursor-pointer" src={assets.next_icon} alt="Next" />
           <img className="w-4 cursor-pointer" src={assets.loop_icon} alt="Loop" />
@@ -70,26 +60,13 @@ const Player = () => {
 
       {/* Volume Control */}
       <div className="flex items-center">
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value={volume}
-          onChange={(e) => changeVolume(e.target.value)}
-          className="w-20"
-        />
+        <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => changeVolume(e.target.value)} className="w-20" />
       </div>
     </div>
   );
 };
 
-// Function to format time (MM:SS)
-const formatTime = (time) => {
-  if (!time) return "0:00";
-  const minutes = Math.floor(time / 60);
-  const seconds = Math.floor(time % 60);
-  return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-};
+// Format Time
+const formatTime = (time) => (time ? `${Math.floor(time / 60)}:${String(Math.floor(time % 60)).padStart(2, "0")}` : "0:00");
 
 export default Player;

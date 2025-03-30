@@ -138,5 +138,13 @@ router.put("/update/:id", async (req, res) => {
   }
 });
 
+router.get("/random-songs", async (req, res) => {
+  try {
+    const songs = await Song.aggregate([{ $sample: { size: 7 } }]);
+    res.json(songs);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 module.exports = router;
