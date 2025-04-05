@@ -15,14 +15,14 @@ connectDB();
 // ✅ Middleware
 app.use(express.json());
 app.use(cors());
-
+app.use(express.urlencoded({ extended: true }));
 // ✅ Default Route
 app.get("/", (req, res) => {
   res.send("🎵 Music API is Running...");
 });
 
 // ✅ Routes
-app.use("/api/upload", uploadRoutes);
+app.use("/api", uploadRoutes);
 app.use("/api/songs", songRoutes);
 
 // 🚀 **Start the Server**

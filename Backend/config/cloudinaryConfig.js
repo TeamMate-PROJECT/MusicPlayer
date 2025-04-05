@@ -1,6 +1,5 @@
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const multer = require("multer");
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -8,18 +7,22 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Multer Storage for Cloudinary
-const storage = new CloudinaryStorage({
+const imageStorage = new CloudinaryStorage({
   cloudinary,
-  params: async (req, file) => {
-    return {
-      folder: "musicplayer",
-      public_id: file.originalname.split(".")[0], // Unique file name
-      resource_type: "auto", // Detect file type (image/audio)
-    };
+  params: {
+    folder: "MusicPlayer/images",
+    allowed_formats: ["jpg", "jpeg", "png"],
+    resource_type: "image",
   },
 });
 
-const upload = multer({ storage });
+const audioStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "MusicPlayer/songs",
+    allowed_formats: ["mp3", "wav"],
+    resource_type: "video", // audio is treated as video by Cloudinary
+  },
+});
 
-module.exports = { cloudinary, upload };
+module.exports = { cloudinary, imageStorage, audioStorage };
