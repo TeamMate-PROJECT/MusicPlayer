@@ -1,96 +1,126 @@
-import React, { createContext, useState, useRef, useEffect } from "react";
+import React, { createContext, useState, useEffect, useRef } from "react";
 
 export const AudioPlayerContext = createContext();
 
 export const AudioPlayerProvider = ({ children }) => {
+  const audioRef = useRef(new Audio());
+  const [songQueue, setSongQueue] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(null);
   const [currentSong, setCurrentSong] = useState(null);
-  const [songsList, setSongsList] = useState([]); // Store song list
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(0.5);
-  const [loop, setLoop] = useState(false);
-  const audioRef = useRef(new Audio());
+  const [volume, setVolume] = useState(1);
 
-  // Update audio source when song changes
-  useEffect(() => {
-    if (currentSong) {
-      audioRef.current.src = currentSong.songUrl;
-      audioRef.current.load();
-      audioRef.current
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch((err) => console.log("Playback error:", err));
+  const playSong = (song, queue = []) => {
+    if (!song?.songUrl) {
+      console.error("No audio URL found for the selected song:", song);
+      return;
     }
-  }, [currentSong]);
-
-  // Track progress and duration
-  useEffect(() => {
-    const updateProgress = () => setProgress(audioRef.current.currentTime);
-    const setAudioDuration = () => setDuration(audioRef.current.duration);
-
-    audioRef.current.addEventListener("timeupdate", updateProgress);
-    audioRef.current.addEventListener("loadedmetadata", setAudioDuration);
-    audioRef.current.volume = volume;
-
-    return () => {
-      audioRef.current.removeEventListener("timeupdate", updateProgress);
-      audioRef.current.removeEventListener("loadedmetadata", setAudioDuration);
-    };
-  }, []);
-
-  // Play or pause song
-  const playSong = (song, list = []) => {
-    if (list.length) setSongsList(list); // Ensure song list is set
 
     if (currentSong?._id === song._id) {
       if (isPlaying) {
         audioRef.current.pause();
+        setIsPlaying(false);
       } else {
         audioRef.current.play();
+        setIsPlaying(true);
       }
-      setIsPlaying(!isPlaying);
-    } else {
-      setCurrentSong(song);
-      setTimeout(() => audioRef.current.play(), 100);
+      return;
+    }
+
+    if (queue.length > 0) {
+      setSongQueue(queue);
+      const index = queue.findIndex((s) => s._id === song._id);
+      setCurrentIndex(index);
+    }
+
+    setCurrentSong(song);
+    audioRef.current.src = song.songUrl;
+    audioRef.current.play().then(() => {
+      setIsPlaying(true);
+    }).catch(err => {
+      console.error("Playback error:", err);
+    });
+  };
+
+  const playNext = () => {
+    if (songQueue.length > 0 && currentIndex !== null) {
+      const nextIndex = (currentIndex + 1) % songQueue.length;
+      const nextSong = songQueue[nextIndex];
+
+      if (!nextSong?.songUrl) {
+        console.error("Next song has no audio URL:", nextSong);
+        return;
+      }
+
+      setCurrentIndex(nextIndex);
+      setCurrentSong(nextSong);
+      audioRef.current.src = nextSong.songUrl;
+      audioRef.current.play();
+      setIsPlaying(true);
     }
   };
 
-  // Play next song
-  const playNext = () => {
-    if (songsList.length === 0 || !currentSong) return;
-
-    const currentIndex = songsList.findIndex((s) => s._id === currentSong._id);
-    const nextIndex = (currentIndex + 1) % songsList.length;
-    playSong(songsList[nextIndex], songsList);
-  };
-
-  // Play previous song
   const playPrevious = () => {
-    if (songsList.length === 0 || !currentSong) return;
+    if (songQueue.length > 0 && currentIndex !== null) {
+      const prevIndex = (currentIndex - 1 + songQueue.length) % songQueue.length;
+      const prevSong = songQueue[prevIndex];
 
-    const currentIndex = songsList.findIndex((s) => s._id === currentSong._id);
-    const prevIndex = (currentIndex - 1 + songsList.length) % songsList.length;
-    playSong(songsList[prevIndex], songsList);
+      if (!prevSong?.songUrl) {
+        console.error("Previous song has no audio URL:", prevSong);
+        return;
+      }
+
+      setCurrentIndex(prevIndex);
+      setCurrentSong(prevSong);
+      audioRef.current.src = prevSong.songUrl;
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
   };
 
-  // Toggle loop
-  const toggleLoop = () => {
-    setLoop(!loop);
-    audioRef.current.loop = !loop;
+  const changeVolume = (val) => {
+    setVolume(val);
+    audioRef.current.volume = val;
   };
 
-  // Seek functionality
   const seekTo = (time) => {
     audioRef.current.currentTime = time;
     setProgress(time);
   };
 
-  // Volume control
-  const changeVolume = (value) => {
-    setVolume(value);
-    audioRef.current.volume = value;
-  };
+  useEffect(() => {
+    const audio = audioRef.current;
+
+    const handleTimeUpdate = () => {
+      setProgress(audio.currentTime);
+    };
+
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration);
+    };
+
+    const handleEnded = () => {
+      playNext();
+    };
+
+    const handleError = (e) => {
+      console.error("Audio playback error:", e);
+    };
+
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("error", handleError);
+
+    return () => {
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("error", handleError);
+    };
+  }, [currentIndex, songQueue]);
 
   return (
     <AudioPlayerContext.Provider
@@ -100,13 +130,11 @@ export const AudioPlayerProvider = ({ children }) => {
         playSong,
         playNext,
         playPrevious,
-        toggleLoop,
         progress,
         duration,
         seekTo,
         volume,
         changeVolume,
-        loop,
       }}
     >
       {children}

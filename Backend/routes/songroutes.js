@@ -147,4 +147,17 @@ router.get("/random-songs", async (req, res) => {
   }
 });
 
+router.get("/songs", async (req, res) => {
+  try {
+    const { emotion } = req.query;
+    const filter = emotion ? { emotion: { $regex: emotion, $options: 'i' } } : {};
+    const songs = await Song.find(filter);
+    res.json(songs);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+
 module.exports = router;

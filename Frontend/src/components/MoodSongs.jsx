@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { AudioPlayerContext } from "../context/AudioPlayerContext";
+
 const MoodSongs = () => {
   const { mood } = useParams();
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentSong, setCurrentSong] = useState(null);
-  const [audio, setAudio] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false); // Track if the song is playing
+
+  const { currentSong, isPlaying, playSong } = useContext(AudioPlayerContext);
 
   useEffect(() => {
     const fetchSongs = async () => {
@@ -31,31 +31,10 @@ const MoodSongs = () => {
     fetchSongs();
   }, [mood]);
 
-  // Function to play or pause song
-  const togglePlayPause = (songUrl) => {
-    if (currentSong === songUrl) {
-      if (isPlaying) {
-        audio.pause();
-        setIsPlaying(false);
-      } else {
-        audio.play();
-        setIsPlaying(true);
-      }
-    } else {
-      if (audio) {
-        audio.pause();
-      }
-      const newAudio = new Audio(songUrl);
-      newAudio.play();
-      setAudio(newAudio);
-      setCurrentSong(songUrl);
-      setIsPlaying(true);
-    }
+  const handleSongSelect = (song) => {
+    playSong(song, songs); // ✅ pass entire songs list as queue
   };
 
-  const Mood = ({ songs, mood }) => {
-    const { playSong } = useContext(AudioPlayerContext);
-  }
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold text-white mb-4">Songs for {mood}</h1>
@@ -68,17 +47,17 @@ const MoodSongs = () => {
           {songs.map((song) => (
             <div
               key={song._id}
-              className={`bg-gray-800 rounded-lg p-4 shadow-lg cursor-pointer transition-transform transform hover:scale-105 ${
-                currentSong === song.songUrl && isPlaying ? "border-2 border-blue-500" : ""
-              }`}
-              onClick={() => togglePlayPause(song.songUrl)}
+              onClick={() => handleSongSelect(song)}
+              className={`bg-gray-800 rounded-lg p-4 shadow-lg cursor-pointer transform hover:scale-105
+                border-2 transition-[border-color] duration-500 ease-in-out ${
+                  currentSong?.audioUrl === song.audioUrl && isPlaying
+                    ? "border-blue-500"
+                    : "border-transparent"
+                }`}
             >
               <img src={song.imageUrl} alt={song.title} className="w-full h-40 object-cover rounded-md" />
               <h2 className="text-white text-lg font-medium mt-2">{song.title}</h2>
               <p className="text-gray-400">{song.artist}</p>
-              <p className="text-sm text-green-400 mt-1">
-                {currentSong === song.songUrl && isPlaying ? "Now Playing..." : "Click to Play"}
-              </p>
             </div>
           ))}
         </div>

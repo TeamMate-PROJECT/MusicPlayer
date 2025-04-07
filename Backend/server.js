@@ -4,7 +4,9 @@ const cors = require("cors");
 const connectDB = require("./config/db"); // ✅ Import connectDB properly
 
 const uploadRoutes = require("./routes/uploadRoutes");
-const songRoutes = require("./routes/songroutes"); // ✅ Ensure correct case
+const songRoutes = require("./routes/songroutes");
+const authRoutes = require("./routes/authRoutes"); // ✅ Ensure correct case
+const playlistRoutes = require("./routes/playlistRoutes"); // ✅ match the others
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,7 +26,8 @@ app.get("/", (req, res) => {
 // ✅ Routes
 app.use("/api", uploadRoutes);
 app.use("/api/songs", songRoutes);
-
+app.use("/api/auth", authRoutes);
+app.use("/api/playlists", playlistRoutes);
 // 🚀 **Start the Server**
 app.listen(PORT, () => {
   console.log(`✅ Server is running on port ${PORT}`);
